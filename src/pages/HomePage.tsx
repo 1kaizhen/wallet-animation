@@ -2,171 +2,212 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 
+interface ProjectCard {
+  id: string;
+  title: string;
+  tags: string[];
+  description: string;
+  status: 'Live' | 'In Lab' | 'Coming Soon';
+  isLive?: boolean;
+  link?: string;
+  image?: string;
+  cardPeekImage?: string;
+}
+
+const PROJECTS: ProjectCard[] = [
+  {
+    id: 'wallet',
+    title: '3D Leather Wallet Animation',
+    tags: ['React 19', 'GSAP 3D', 'Gestures'],
+    description: 'Interactive 3D leather wallet with physical card drag, single-swipe flips, weighted friction, and slot reordering.',
+    status: 'Live',
+    isLive: true,
+    link: '/wallet',
+    image: '/Assets/wallet/Wallet.png',
+    cardPeekImage: '/Assets/ICICI/icici wallet card.svg',
+  },
+  {
+    id: 'weather',
+    title: 'Weather React & Canvas FX',
+    tags: ['React', 'Canvas FX', 'Interactive Globe'],
+    description: 'Real-time weather visualization with dynamic particle canvas effects, 3D interactive globe navigation, and atmospheric lighting.',
+    status: 'Live',
+    isLive: true,
+    link: '/weather',
+    image: '/weather-react/src/assets/photos/dubai.jpg',
+  },
+  {
+    id: 'kinetic-dock',
+    title: 'Kinetic Gesture Dock',
+    tags: ['Spring Physics', 'Gestures'],
+    description: 'Fluid bottom dock with magnetic attraction, spring physics, and momentum velocity decay.',
+    status: 'In Lab',
+  },
+  {
+    id: 'glass-spatial',
+    title: 'Glassmorphic Spatial Deck',
+    tags: ['Backdrop Blur', '3D Light'],
+    description: 'Multi-layered glass cards with real-time 3D cursor tilt calculations and specular reflections.',
+    status: 'In Lab',
+  },
+];
+
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const cardRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const handleCardClick = () => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    // Animate card click scale before navigating to /wallet
-    gsap.to(card, {
-      scale: 0.96,
-      duration: 0.12,
-      ease: 'power2.out',
-      onComplete: () => {
-        gsap.to(card, {
-          scale: 1.05,
-          duration: 0.2,
+  const handleLaunchProject = (project: ProjectCard) => {
+    if (project.link) {
+      const cardEl = cardRefs.current[project.id];
+      if (cardEl) {
+        gsap.to(cardEl, {
+          scale: 0.97,
+          duration: 0.12,
           ease: 'power2.out',
           onComplete: () => {
-            navigate('/wallet');
+            gsap.to(cardEl, {
+              scale: 1.02,
+              duration: 0.18,
+              ease: 'power2.out',
+              onComplete: () => {
+                navigate(project.link!);
+              },
+            });
           },
         });
-      },
-    });
+      } else {
+        navigate(project.link);
+      }
+    }
   };
 
-  // Animate hero elements on mount
   useEffect(() => {
     const hero = heroRef.current;
     if (!hero) return;
 
     const children = hero.querySelectorAll('[data-animate]');
-    gsap.fromTo(children, {
-      opacity: 0,
-      y: 24,
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.65,
-      stagger: 0.12,
-      ease: 'power3.out',
-      delay: 0.15,
-    });
+    gsap.fromTo(
+      children,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power3.out',
+      }
+    );
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-[#0a0a0a] relative overflow-hidden">
-
-      {/* Subtle background gradient */}
-      <div className="fixed inset-0 pointer-events-none z-0" style={{
-        background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 60%)',
-      }} />
-
-      {/* ─── HERO / HOMEPAGE CONTENT ─── */}
-      <div ref={heroRef} className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
-
-        {/* Header badge */}
-        <div data-animate className="mb-8">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-xs text-neutral-400 tracking-wide uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Interactive Portfolio Showcase
+    <div className="min-h-screen w-full bg-[#0a0a0c] text-neutral-100 px-6 py-16 sm:py-24 font-sans selection:bg-neutral-800">
+      
+      <div ref={heroRef} className="max-w-5xl mx-auto">
+        
+        {/* ─── 1. MINIMAL HEADER / TITLE ─── */}
+        <div data-animate className="mb-14">
+          <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest block mb-2">
+            Denis Daniel — Playground
           </span>
+          <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
+            Selected Experiments
+          </h1>
+          <p className="text-neutral-400 text-sm mt-2 max-w-md leading-relaxed">
+            A collection of interactive UI components, 3D physics, and gesture controls.
+          </p>
         </div>
 
-        {/* Title */}
-        <h1 data-animate className="text-4xl sm:text-5xl md:text-6xl font-bold text-center text-white tracking-tight leading-tight max-w-2xl">
-          Aether Wallet
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-red-400 mt-1">
-            Animation
-          </span>
-        </h1>
+        {/* ─── 2. MINIMAL PROJECT CARDS GRID ─── */}
+        <div data-animate className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {PROJECTS.map((project) => {
+            return (
+              <div
+                key={project.id}
+                ref={(el) => {
+                  cardRefs.current[project.id] = el;
+                }}
+                onClick={() => project.isLive && handleLaunchProject(project)}
+                className={`group relative rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                  project.isLive
+                    ? 'cursor-pointer border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.05] hover:shadow-2xl'
+                    : 'border-white/[0.05] bg-white/[0.015] opacity-60'
+                }`}
+              >
+                {/* Preview Image Area */}
+                <div className="relative h-56 bg-[#121216] flex items-center justify-center overflow-hidden border-b border-white/[0.06] p-6">
+                  {project.image ? (
+                    <div className="relative w-48 opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105 transform">
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-auto drop-shadow-xl"
+                      />
+                      {project.cardPeekImage && (
+                        <div className="absolute top-[10%] left-[8%] w-[84%]">
+                          <img
+                            src={project.cardPeekImage}
+                            alt="Card Peek"
+                            className="w-full rounded-lg drop-shadow-md transition-transform duration-300 group-hover:-translate-y-3"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-2xl opacity-40">✦</span>
+                  )}
 
-        {/* Subtitle */}
-        <p data-animate className="mt-5 text-neutral-400 text-center text-base sm:text-lg max-w-md leading-relaxed">
-          A premium 3D interactive leather wallet built with React, GSAP, and touch gestures. Click the card below to open the demo link.
-        </p>
+                  {/* Status Badge */}
+                  <div className="absolute top-4 right-4">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider ${
+                      project.isLive
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-white/5 text-neutral-500 border border-white/5'
+                    }`}>
+                      {project.status}
+                    </span>
+                  </div>
+                </div>
 
-        {/* ─── INTERACTIVE SHOWCASE CARD ─── */}
-        <div
-          data-animate
-          ref={cardRef}
-          onClick={handleCardClick}
-          className="mt-12 group cursor-pointer relative"
-        >
-          {/* Glow behind the card */}
-          <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 pointer-events-none" />
+                {/* Info Content */}
+                <div className="p-6">
+                  <h2 className="text-lg font-medium text-white tracking-tight group-hover:text-amber-300 transition-colors">
+                    {project.title}
+                  </h2>
+                  <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                    {project.description}
+                  </p>
 
-          {/* The card itself */}
-          <div className="relative w-[340px] sm:w-[400px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-sm overflow-hidden transition-all duration-300 group-hover:border-white/20 group-hover:shadow-2xl group-hover:shadow-amber-500/10">
+                  {/* Tags & Action */}
+                  <div className="mt-5 flex items-center justify-between">
+                    <div className="flex gap-2">
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="text-[10px] font-mono text-neutral-500">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
 
-            {/* Card image area */}
-            <div className="relative h-[200px] sm:h-[240px] bg-[#161616] flex items-center justify-center overflow-hidden">
-              {/* Mini wallet preview */}
-              <div className="relative w-[180px] sm:w-[200px] opacity-80 group-hover:opacity-100 transition-opacity duration-300 group-hover:scale-105 transform transition-transform">
-                <img
-                  src="/Assets/wallet/Wallet.png"
-                  alt="Wallet Preview"
-                  className="w-full h-auto drop-shadow-xl"
-                />
-                {/* Mini card peek */}
-                <div className="absolute top-[10%] left-[8%] w-[84%]">
-                  <img
-                    src="/Assets/ICICI/icici wallet card.svg"
-                    alt="Card Preview"
-                    className="w-full rounded-lg drop-shadow-md"
-                    style={{ transform: 'translateY(-12px)' }}
-                  />
+                    {project.isLive && (
+                      <span className="text-xs font-medium text-amber-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        Open Demo →
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              {/* Play icon overlay */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                  <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Card text area */}
-            <div className="p-5 sm:p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 text-[10px] font-semibold uppercase tracking-wider">
-                  Interactive
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-white/5 text-neutral-500 text-[10px] font-semibold uppercase tracking-wider">
-                  React + GSAP
-                </span>
-              </div>
-
-              <h3 className="text-lg font-semibold text-white mt-2">
-                3D Leather Wallet
-              </h3>
-              <p className="text-sm text-neutral-400 mt-1.5 leading-relaxed">
-                Drag cards out, flip to see the back, reorder with gestures. Click to open standalone page link.
-              </p>
-
-              {/* CTA arrow */}
-              <div className="mt-4 flex items-center gap-2 text-sm text-amber-400 font-medium group-hover:gap-3 transition-all duration-300">
-                Open Demo Link (/wallet)
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* Direct link button option */}
-        <div data-animate className="mt-6">
-          <a
-            href="#/wallet"
-            className="text-xs text-neutral-400 hover:text-white underline underline-offset-4 transition-colors"
-          >
-            Direct Link: #/wallet
-          </a>
+        {/* ─── 3. MINIMAL FOOTER ─── */}
+        <div data-animate className="mt-20 pt-8 border-t border-white/[0.06] flex items-center justify-between text-xs text-neutral-500 font-mono">
+          <span>Denis Daniel</span>
+          <span>React 19 + GSAP</span>
         </div>
 
-        {/* Footer hint */}
-        <p data-animate className="mt-10 text-neutral-600 text-xs tracking-wide">
-          Built by Denis Daniel
-        </p>
       </div>
+
     </div>
   );
 };
