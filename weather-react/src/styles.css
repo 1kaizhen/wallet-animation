@@ -11,7 +11,7 @@
   --guide: rgba(255,255,255,.125);       /* horizontals outside the frame */
   --glow: #7a5f22;
   --orb-x: 50%;
-  --panel: min(100vw, clamp(640px, 55vw, 880px));
+  --panel: min(100vw, clamp(720px, 60vw, 1040px));
   --hatch: 37px;
   --pad-in: clamp(20px, 7vw, 67px);
   --pad-out: clamp(12px, 3.2vw, 30px);

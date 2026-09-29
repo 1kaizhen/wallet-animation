@@ -10,8 +10,8 @@ export default function Guides({ refs, layoutKey }) {
     if (docW < 860 || !refs.panel || !refs.stats || !refs.arcGeom) { setLines(prev => (prev.length ? [] : prev)); return; }
     const pr = refs.panel.getBoundingClientRect();
     const hatch = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hatch')) || 37;
-    const leftW = Math.max(0, Math.round(pr.left + scrollX - hatch));
-    const rightX = Math.round(pr.right + scrollX + hatch);
+    const leftW = Math.max(0, Math.floor(pr.left - hatch - 1));
+    const rightX = Math.ceil(pr.right + hatch + 1);
     const stats = refs.stats.getBoundingClientRect(), g = refs.arcGeom();
     const ys = [['l', g.top + g.yh], ['r', g.top + g.yh], ['l', stats.top], ['r', stats.top], ['l', stats.bottom - 1], ['r', stats.bottom - 1]];
     const he = refs.hourlyEnds;
